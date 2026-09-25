@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Шок-Келді: 1917 vs 2026</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+        .font-cinzel { font-family: 'Cinzel', serif; }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen flex items-center justify-center p-4">
+
+    <div id="game-container" class="w-full max-w-2xl bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl relative overflow-hidden transition-all duration-700">
+        
+        <!-- Шок шкасы (Stress Bar) -->
+        <div id="stress-section" class="mb-6 hidden">
+            <div class="flex justify-between text-xs text-zinc-400 mb-1 font-cinzel">
+                <span>МЕНТАЛДЫҚ ШОК ШКАСЫ</span>
+                <span id="stress-text">10%</span>
+            </div>
+            <div class="w-full bg-zinc-800 h-2.5 rounded-full overflow-hidden">
+                <div id="stress-bar" class="bg-amber-600 h-full transition-all duration-500 w-[10%]"></div>
+            </div>
+        </div>
+
+        <!-- Кейіпкер аты мен портрет аймағы -->
+        <div class="flex items-center gap-4 mb-4">
+            <div id="char-avatar" class="w-14 h-14 rounded-full bg-zinc-800 border-2 border-amber-600 flex items-center justify-center text-2xl font-bold font-cinzel shadow-inner text-amber-500">
+                Ж
+            </div>
+            <div>
+                <h3 id="char-name" class="font-cinzel text-lg font-bold tracking-wider text-amber-500">Батыр Жантемір</h3>
+                <p id="char-role" class="text-xs text-zinc-400">1916 жылғы көтеріліс сарбазы</p>
+            </div>
+        </div>
+
+        <!-- Диалог мәтіні -->
+        <div class="bg-zinc-950/80 border border-zinc-800/80 rounded-xl p-5 min-h-[120px] flex items-center mb-6 shadow-inner">
+            <p id="dialogue-text" class="text-zinc-200 text-base leading-relaxed">
+                Қараңғылық... Кенеттен көзді қарықтырған жарық пен зәулім тас үйлер. «Бұл қай халықтың ордасы? Жерімді жау басып қалды ма?!»
+            </p>
+        </div>
+
+        <!-- Таңдаулар / Кнопкалар -->
+        <div id="choices-container" class="flex flex-col gap-3">
+            <button onclick="nextStep(1)" class="w-full text-left bg-zinc-800 hover:bg-zinc-700 active:scale-[0.99] border border-zinc-700 py-3.5 px-4 rounded-xl text-sm transition font-medium cursor-pointer flex items-center justify-between group">
+                <span>Айналаға таңдана қарау және Алматы көшелерімен жүру</span>
+                <span class="text-amber-500 group-hover:translate-x-1 transition">→</span>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        let currentStep = 0;
+
+        const story = [
+            {
+                name: "Батыр Жантемір",
+                role: "1916 жылғы көтеріліс сарбазы",
+                avatar: "Ж",
+                text: "Қараңғылық... Кенеттен көзді қарықтырған жарық пен зәулім тас үйлер. «Бұл қай халықтың ордасы? Жерімді жау басып қалды ма?!»",
+                stress: 15,
+                choices: [
+                    { text: "Қасымыздағы Алаш қайраткерімен сөйлесу", next: 1 }
+                ]
+            },
+            {
+                name: "Әлихан (Алаш қайраткері)",
+                role: "«Қазақ» газетінің негізін қалаушы",
+                avatar: "Ә",
+                text: "Сабыр ет, батырым... Біз армандаған тәуелсіз заман келген болар. Мына жастардан сұрайықшы...",
+                stress: 25,
+                choices: [
+                    { text: "Өтіп бара жатқан заманауи жастарға жақындау", next: 2 }
+                ]
+            },
+            {
+                name: "Заманауи жас жігіт",
+                role: "Алматы тұрғыны",
+                avatar: "М",
+                text: "— Извините, а как пройти до ТРЦ? Вы тут на каких-то странных костюмах, фото можно сделать, бро?",
+                stress: 55,
+                choices: [
+                    { text: "Батырдың қылышына жармасуы: «Мынау қай тіл?! Өз жерімізде жатша сөйлейсіңдер ме?!»", next: 3 },
+                    { text: "Алаш қайраткерінің үнсіз қалуы (жүрегі ауырып)", next: 3 }
+                ]
+            },
+            {
+                name: "Әлихан (Алаш қайраткері)",
+                role: "Рухы түскен зиялы",
+                avatar: "Ә",
+                text: "«Біз бұл елдің болашағы үшін оққа ұш едік қой... Тілсіз халық — ұлт емес, мал болады деуші едік. Неге өз үйімізде жат жерліктей күй кештік?»",
+                stress: 85,
+                choices: [
+                    { text: "Айнаға қараған сәт: Ойыншының өзіне қойлар сұрағы", next: 4 }
+                ]
+            },
+            {
+                name: "АВТОРДАН ҮНДЕУ",
+                role: "Жүрекке тиер шындық",
+                avatar: "Ұ",
+                text: "Ойын аяқталды. Бірақ сұрақ ашық қалады: Бүгін сен өз ана тіліңді сақтау үшін, оның қадірін арттыру үшін не істедің? Тіл жоғалса — ұлт өледі.",
+                stress: 100,
+                choices: [
+                    { text: "🔄 Ойынды басынан бастау", next: 0 }
+                ]
+            }
+        ];
+
+        function nextStep(stepIndex) {
+            currentStep = stepIndex >= story.length ? 0 : stepIndex;
+            const data = story[currentStep];
+
+            // Шкааны көрсету
+            document.getElementById('stress-section').classList.remove('hidden');
+            document.getElementById('stress-bar').style.width = data.stress + '%';
+            document.getElementById('stress-text').innerText = data.stress + '%';
+
+            // Деректерді жаңарту
+            document.getElementById('char-name').innerText = data.name;
+            document.getElementById('char-role').innerText = data.role;
+            document.getElementById('char-avatar').innerText = data.avatar;
+            document.getElementById('dialogue-text').innerText = data.text;
+
+            // Батырмаларды генерациялау
+            const choicesContainer = document.getElementById('choices-container');
+            choicesContainer.innerHTML = '';
+
+            data.choices.forEach(choice => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left bg-zinc-800 hover:bg-zinc-700 active:scale-[0.99] border border-zinc-700 py-3.5 px-4 rounded-xl text-sm transition font-medium cursor-pointer flex items-center justify-between group";
+                btn.innerHTML = `<span>${choice.text}</span> <span class="text-amber-500 group-hover:translate-x-1 transition">→</span>`;
+                btn.onclick = () => nextStep(choice.next);
+                choicesContainer.appendChild(btn);
+            });
+        }
+    </script>
+</body>
+</html>
